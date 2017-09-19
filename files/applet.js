@@ -4,6 +4,8 @@ const PopupMenu = imports.ui.popupMenu;
 const Settings = imports.ui.settings;
 const Main = imports.ui.main;
 const Util = imports.misc.util;
+const St = imports.gi.St;
+const MessageTray = imports.ui.messageTray;
 
 function MyApplet(orientation, panel_height, instance_id) {
   this._init(orientation, panel_height, instance_id);
@@ -46,6 +48,29 @@ MyApplet.prototype = {
   startCM: function(id) {
     Main.Util.spawnCommandLine('mocp -c -a -p ' + id);
   },
+
+  _ensureSource: function() {
+    if (!this._source) {
+      this._source = new MessageTray.Source();
+      this._source.connect("destroy", Lang.bind(this, function() { this._source = null; }));
+      if (Main.messageTray) Main.messageTray.add(this._source);
+    }
+  },
+
+  _notifyMessage: function(notificationIcon, text) {
+    if (this._notification) this._notification.destroy();
+    /* must call after destroying previous notification,
+     * or this._source will be cleared */
+    this._ensureSource();
+    /* set icon every time, otherwise it breaks after fist time..(?) */
+    let icon = new St.Icon({ icon_name: notificationIcon.get_name(), gicon: notificationIcon.get_gicon(), icon_type: St.IconType.SYMBOLIC, icon_size: 22 });
+    this._notification = new MessageTray.Notification( this._source, _("Radio++"), text, { icon: icon });
+    this._notification.setUrgency(MessageTray.Urgency.NORMAL);
+    this._notification.setTransient(true);
+    this._notification.connect("destroy", function() { this._notification = null; });
+    this._source.notify(this._notification);
+  },
+
   on_applet_clicked: function(event) {
     this.menu.toggle();
   },
