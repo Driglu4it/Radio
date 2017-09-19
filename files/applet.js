@@ -38,7 +38,7 @@ MyApplet.prototype = {
   },
   on_settings_changed: function() {
     this.set_applet_tooltip(_("Radio++"));
-    this.set_applet_icon_name('radio');
+    this.set_applet_icon_symbolic_path(icon_radio_off);
     this.menu.removeAll();
     this.menuManager.addMenu(this.menu);
     var i;
