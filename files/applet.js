@@ -9,10 +9,10 @@ function MyApplet(orientation, panel_height, instance_id) {
   this._init(orientation, panel_height, instance_id);
 }
 MyApplet.prototype = {
-  __proto__: Applet.TextIconApplet.prototype,
+  __proto__: Applet.IconApplet.prototype,
   _init: function(orientation, panel_height, instance_id) {
     Main.Util.spawnCommandLine("mocp");
-    Applet.TextIconApplet.prototype._init.call(this, orientation, panel_height, instance_id);
+    Applet.IconApplet.prototype._init.call(this, orientation, panel_height, instance_id);
     this.menuManager = new PopupMenu.PopupMenuManager(this);
     this.menu = new Applet.AppletPopupMenu(this, orientation);
     this.menuManager.addMenu(this.menu);
