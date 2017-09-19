@@ -5,8 +5,11 @@ const Settings = imports.ui.settings;
 const Main = imports.ui.main;
 const Util = imports.misc.util;
 const St = imports.gi.St;
+const Gio = imports.gi.Gio;
 const MessageTray = imports.ui.messageTray;
 
+let icon_radio_on;
+let icon_radio_off;
 function MyApplet(orientation, panel_height, instance_id) {
   this._init(orientation, panel_height, instance_id);
 }
@@ -20,6 +23,17 @@ MyApplet.prototype = {
     this.menuManager.addMenu(this.menu);
     this.settings = new Settings.AppletSettings(this, "radio@driglu4it", instance_id);
     this.settings.bind("tree", "name", this.on_settings_changed);
+
+    // radio on icon for notifications
+    let radio_on_icon_file = Gio.file_new_for_path(icon_radio_on);
+    let radio_on_gicon = new Gio.FileIcon({ file: radio_on_icon_file });
+    this.radio_on_icon = new St.Icon({ icon_name: "radio-on", gicon: radio_on_gicon, icon_size: 22, icon_type: St.IconType.SYMBOLIC, style_class: "applet-icon" });
+
+    // radio off icon for notifications
+    let radio_off_icon_file = Gio.file_new_for_path(icon_radio_off);
+    let radio_off_gicon = new Gio.FileIcon({ file: radio_off_icon_file });
+    this.radio_off_icon = new St.Icon({ icon_name: "radio-off", gicon: radio_off_gicon, icon_size: 22, icon_type: St.IconType.SYMBOLIC, style_class: "applet-icon" });
+
     this.on_settings_changed();
   },
   on_settings_changed: function() {
@@ -80,6 +94,10 @@ MyApplet.prototype = {
 };
 
 function main(metadata, orientation, panel_height, instance_id) { // Make sure you collect and pass on instanceId
+  // icon paths
+  icon_radio_on = metadata.path + "/radio-on-symbolic.svg";
+  icon_radio_off = metadata.path + "/radio-off-symbolic.svg";
+
   let myApplet = new MyApplet(orientation, panel_height, instance_id);
   return myApplet;
 }
