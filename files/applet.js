@@ -81,6 +81,24 @@ MyApplet.prototype = {
     this.set_applet_tooltip(_("Radio++ " + this.currentStationTitle + " stopped"));
     this.isPlaying = false;
   },
+
+  _onButtonPressEvent: function(actor, event) {
+    let buttonId = event.get_button();
+    if (buttonId === 2) {
+      if (this.isPlaying) {
+        this.stopCM();
+      } else {
+        if (this.currentStationId && this.currentStationTitle) {
+          this.startCM(this.currentStationId, this.currentStationTitle);
+        } else {
+          this._notifyMessage(
+            this.radio_off_icon, _("No station selected. Select a station from the menu."));
+        }
+      }
+    }
+    return Applet.Applet.prototype._onButtonPressEvent.call(this, actor, event);
+  },
+
   _ensureSource: function() {
     if (!this._source) {
       this._source = new MessageTray.Source();
