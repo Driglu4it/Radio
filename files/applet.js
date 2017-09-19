@@ -10,6 +10,10 @@ const MessageTray = imports.ui.messageTray;
 
 let icon_radio_on;
 let icon_radio_off;
+let isPlaying = false;
+let currentStationId;
+let currentStationTitle;
+
 function MyApplet(orientation, panel_height, instance_id) {
   this._init(orientation, panel_height, instance_id);
 }
@@ -48,21 +52,35 @@ MyApplet.prototype = {
       let id = this.name[i].url;
       let menuitem = new PopupMenu.PopupMenuItem(title);
       menuitem.connect('activate', Lang.bind(this, function() {
-        this.startCM(id);
-        Main.notify(_("Playing") + ' ' + title);
-      }));
+          this.startCM(id, title);
+        })
+      );
       this.menu.addMenuItem(menuitem);
     }
     this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-    this.menu.addAction(_("Stop"), function(event) {
-      Main.Util.spawnCommandLine("mocp -s");
-      Main.notify(_("Stop") + ' Radio++');
-    });
-  },
-  startCM: function(id) {
-    Main.Util.spawnCommandLine('mocp -c -a -p ' + id);
+    this.menu.addAction(_("Stop"), Lang.bind(this, function(event) {
+        this.stopCM();
+      })
+    );
   },
 
+  startCM: function(id, title) {
+    Main.Util.spawnCommandLine("mocp -c -a -p " + id);
+    this._notifyMessage(this.radio_on_icon, _("Playing" + " " + title));
+    this.set_applet_icon_symbolic_path(icon_radio_on);
+    this.set_applet_tooltip(_("Radio++ " + title + " playing"));
+    this.currentStationId = id;
+    this.currentStationTitle = title;
+    this.isPlaying = true;
+  },
+
+  stopCM: function() {
+    Main.Util.spawnCommandLine("mocp -s");
+    this._notifyMessage(this.radio_off_icon, _("Stopped " + this.currentStationTitle));
+    this.set_applet_icon_symbolic_path(icon_radio_off);
+    this.set_applet_tooltip(_("Radio++ " + this.currentStationTitle + " stopped"));
+    this.isPlaying = false;
+  },
   _ensureSource: function() {
     if (!this._source) {
       this._source = new MessageTray.Source();
